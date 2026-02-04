@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valentine?</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: #ffe6eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    .container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 40px;
+      transition: all 0.3s ease;
+    }
+
+    .buttons {
+      position: relative;
+      width: 100%;
+      max-width: 300px;
+      height: 120px;
+    }
+
+    button {
+      padding: 14px 28px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #yesBtn {
+      background-color: #ff4d6d;
+      color: white;
+    }
+
+    #noBtn {
+      background-color: #ccc;
+      position: absolute;
+      left: 55%;
+      top: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="container">
+    <h1 id="question">Will you be my Valentine? ❤️</h1>
+
+    <div class="buttons">
+      <button id="yesBtn">Yes</button>
+      <button id="noBtn">No</button>
+    </div>
+  </div>
+
+  <script>
+    const noBtn = document.getElementById("noBtn");
+    const yesBtn = document.getElementById("yesBtn");
+    const question = document.getElementById("question");
+    const buttons = document.querySelector(".buttons");
+    const container = document.getElementById("container");
+
+    const messages = [
+      "Try again 😏",
+      "No other option 😌",
+      "Think again 🤔",
+      "Are you sure? 💕",
+      "Wrong answer 😄",
+      "Come on… say yes ❤️",
+      "You know you want to 😉"
+    ];
+
+    let clickCount = 0;
+    let isSuccessScreen = false;
+    let lastTap = 0;
+
+    noBtn.addEventListener("click", () => {
+      question.textContent = messages[clickCount % messages.length];
+      clickCount++;
+
+      const maxX = buttons.clientWidth - noBtn.offsetWidth;
+      const maxY = buttons.clientHeight - noBtn.offsetHeight;
+
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+
+      noBtn.style.left = `${x}px`;
+      noBtn.style.top = `${y}px`;
+    });
+
+    yesBtn.addEventListener("click", () => {
+      isSuccessScreen = true;
+      document.body.innerHTML = `
+        <div id="success" style="
+          height:100vh;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          background:#ffe6eb;
+          font-family:Arial;
+          text-align:center;
+        ">
+          <h1 style="color:#ff4d6d;">
+            Yay!!! 💖 Happy Valentine’s Day!
+          </h1>
+        </div>
+      `;
+    });
+
+    // Double-tap on blank space to reset
+    container.addEventListener("touchend", (e) => {
+      if (e.target.tagName === "BUTTON") return;
+
+      const currentTime = new Date().getTime();
+      const tapLength = currentTime - lastTap;
+
+      if (tapLength < 300 && tapLength > 0) {
+        resetScreen();
+      }
+
+      lastTap = currentTime;
+    });
+
+    function resetScreen() {
+      question.textContent = "Will you be my Valentine? ❤️";
+      clickCount = 0;
+      noBtn.style.left = "55%";
+      noBtn.style.top = "0";
+    }
+  </script>
+</body>
+</html>
