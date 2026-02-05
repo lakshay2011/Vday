@@ -107,8 +107,7 @@
     <p style="font-size: 1.5rem;">See you on the 14th Ms. Priya Chawla!</p>
   </div>
 
-  <script>
-    const noBtn = document.getElementById("noBtn");
+  const noBtn = document.getElementById("noBtn");
     const yesBtn = document.getElementById("yesBtn");
     const question = document.getElementById("question");
     const mainScreen = document.getElementById("mainScreen");
@@ -121,16 +120,62 @@
       "Don't do this to me... 💔",
       "I'm gonna cry... 😭",
       "You're breaking my heart! 🍎",
-      "Wrong button! 😄"
+      "Wrong button! 😄",
+      "Try again 😏",
+      "No other option 😌"
     ];
 
     let clickCount = 0;
 
-    noBtn.addEventListener("mouseover", moveButton); // For Desktop
-    noBtn.addEventListener("click", () => {
-        moveButton();
-        updateUI();
+    // This function handles both moving the button AND updating the text/size
+    function handleNoAction() {
+      // 1. Move the button
+      const padding = 50;
+      const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - padding);
+      const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - padding);
+      
+      noBtn.style.position = "fixed";
+      noBtn.style.left = `${x}px`;
+      noBtn.style.top = `${y}px`;
+
+      // 2. Update the text message
+      question.textContent = messages[clickCount % messages.length];
+      
+      // 3. Make the YES button bigger
+      clickCount++;
+      const newScale = 1 + (clickCount * 0.3);
+      yesBtn.style.transform = `scale(${newScale})`;
+      
+      // 4. Fade the No button slightly
+      noBtn.style.opacity = Math.max(0.3, 1 - (clickCount * 0.1));
+    }
+
+    // Trigger on both hover (desktop) and click (mobile/desktop)
+    noBtn.addEventListener("mouseover", handleNoAction);
+    noBtn.addEventListener("click", handleNoAction);
+
+    yesBtn.addEventListener("click", () => {
+      mainScreen.classList.add("hidden");
+      successScreen.classList.remove("hidden");
+      createHearts();
     });
+
+    function createHearts() {
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const heart = document.createElement("div");
+          heart.classList.add("heart");
+          heart.innerHTML = "❤️";
+          heart.style.left = Math.random() * 100 + "vw";
+          heart.style.top = "100vh";
+          heart.style.fontSize = (Math.random() * 20 + 10) + "px";
+          heart.style.animationDuration = (Math.random() * 2 + 1) + "s";
+          document.body.appendChild(heart);
+          
+          setTimeout(() => heart.remove(), 2000);
+        }, i * 50);
+      }
+    }
 
     function moveButton() {
       // Calculate random position within the viewport
@@ -181,4 +226,5 @@
   </script>
 </body>
 </html>
+
 
