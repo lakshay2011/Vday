@@ -3,150 +3,180 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Valentine?</title>
-
+  <title>Be My Valentine?</title>
   <style>
+    :root {
+      --primary-pink: #ff4d6d;
+      --soft-pink: #ffe6eb;
+    }
+
     body {
       margin: 0;
       height: 100vh;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      background: #ffe6eb;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--soft-pink);
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
       user-select: none;
     }
 
     .container {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
       text-align: center;
       padding: 20px;
-      box-sizing: border-box;
+      transition: opacity 0.5s ease;
+    }
+
+    .hidden {
+      display: none !important;
     }
 
     h1 {
-      font-size: 1.8rem;
-      margin-bottom: 40px;
-      transition: all 0.3s ease;
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 30px;
+      min-height: 80px;
     }
 
     .buttons {
       position: relative;
-      width: 100%;
-      max-width: 300px;
-      height: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      min-height: 200px; /* Space for the growing button */
     }
 
     button {
-      padding: 14px 28px;
-      font-size: 1rem;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      font-weight: bold;
       border: none;
-      border-radius: 10px;
+      border-radius: 50px;
       cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
 
     #yesBtn {
-      background-color: #ff4d6d;
+      background-color: var(--primary-pink);
       color: white;
+      z-index: 10;
     }
 
     #noBtn {
-      background-color: #ccc;
+      background-color: #fff;
+      color: #888;
+      position: relative;
+    }
+
+    #successMsg {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .heart {
       position: absolute;
-      left: 55%;
-      top: 0;
+      color: var(--primary-pink);
+      font-size: 20px;
+      pointer-events: none;
+      animation: floatUp 2s linear forwards;
+    }
+
+    @keyframes floatUp {
+      to {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container" id="container">
-    <h1 id="question">Will you be my Valentine? ❤️</h1>
 
-    <div class="buttons">
+  <div class="container" id="mainScreen">
+    <h1 id="question">Will you be my Valentine? ❤️</h1>
+    <div class="buttons" id="buttonArea">
       <button id="yesBtn">Yes</button>
       <button id="noBtn">No</button>
     </div>
+  </div>
+
+  <div class="container hidden" id="successScreen">
+    <h1 style="color: var(--primary-pink); font-size: 3rem;">Yay!!! 💖</h1>
+    <p style="font-size: 1.5rem;">See you on the 14th!</p>
   </div>
 
   <script>
     const noBtn = document.getElementById("noBtn");
     const yesBtn = document.getElementById("yesBtn");
     const question = document.getElementById("question");
-    const buttons = document.querySelector(".buttons");
-    const container = document.getElementById("container");
+    const mainScreen = document.getElementById("mainScreen");
+    const successScreen = document.getElementById("successScreen");
 
     const messages = [
-      "Try again 😏",
-      "No other option 😌",
-      "Think again 🤔",
-      "Are you sure? 💕",
-      "Wrong answer 😄",
-      "Come on… say yes ❤️",
-      "You know you want to 😉"
+      "Are you sure? 🤔",
+      "Really sure? 🥺",
+      "Think about it! 💭",
+      "Don't do this to me... 💔",
+      "I'm gonna cry... 😭",
+      "You're breaking my heart! 🍎",
+      "Wrong button! 😄"
     ];
 
     let clickCount = 0;
-    let isSuccessScreen = false;
-    let lastTap = 0;
 
+    noBtn.addEventListener("mouseover", moveButton); // For Desktop
     noBtn.addEventListener("click", () => {
-      question.textContent = messages[clickCount % messages.length];
-      clickCount++;
+        moveButton();
+        updateUI();
+    });
 
-      const maxX = buttons.clientWidth - noBtn.offsetWidth;
-      const maxY = buttons.clientHeight - noBtn.offsetHeight;
-
-      const x = Math.random() * maxX;
-      const y = Math.random() * maxY;
-
+    function moveButton() {
+      // Calculate random position within the viewport
+      const padding = 50;
+      const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - padding);
+      const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - padding);
+      
+      noBtn.style.position = "fixed";
       noBtn.style.left = `${x}px`;
       noBtn.style.top = `${y}px`;
-    });
+    }
+
+    function updateUI() {
+      // Change the question text
+      question.textContent = messages[clickCount % messages.length];
+      
+      // Make the YES button bigger!
+      clickCount++;
+      const newScale = 1 + (clickCount * 0.3);
+      yesBtn.style.transform = `scale(${newScale})`;
+      
+      // Push the No button further away in hierarchy
+      noBtn.style.opacity = Math.max(0.2, 1 - (clickCount * 0.1));
+    }
 
     yesBtn.addEventListener("click", () => {
-      isSuccessScreen = true;
-      document.body.innerHTML = `
-        <div id="success" style="
-          height:100vh;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          background:#ffe6eb;
-          font-family:Arial;
-          text-align:center;
-        ">
-          <h1 style="color:#ff4d6d;">
-            Yay!!! 💖 Happy Valentine’s Day!
-          </h1>
-        </div>
-      `;
+      mainScreen.classList.add("hidden");
+      successScreen.classList.remove("hidden");
+      createHearts();
     });
 
-    // Double-tap on blank space to reset
-    container.addEventListener("touchend", (e) => {
-      if (e.target.tagName === "BUTTON") return;
-
-      const currentTime = new Date().getTime();
-      const tapLength = currentTime - lastTap;
-
-      if (tapLength < 300 && tapLength > 0) {
-        resetScreen();
+    function createHearts() {
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const heart = document.createElement("div");
+          heart.classList.add("heart");
+          heart.innerHTML = "❤️";
+          heart.style.left = Math.random() * 100 + "vw";
+          heart.style.top = "100vh";
+          heart.style.fontSize = (Math.random() * 20 + 10) + "px";
+          heart.style.animationDuration = (Math.random() * 2 + 1) + "s";
+          document.body.appendChild(heart);
+          
+          setTimeout(() => heart.remove(), 2000);
+        }, i * 50);
       }
-
-      lastTap = currentTime;
-    });
-
-    function resetScreen() {
-      question.textContent = "Will you be my Valentine? ❤️";
-      clickCount = 0;
-      noBtn.style.left = "55%";
-      noBtn.style.top = "0";
     }
   </script>
 </body>
