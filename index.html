@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Be My Valentine?</title>
+  
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  
   <style>
     :root {
       --primary-pink: #ff4d6d;
@@ -26,6 +29,8 @@
       text-align: center;
       padding: 20px;
       transition: opacity 0.5s ease;
+      width: 100%;
+      max-width: 600px;
     }
 
     .hidden {
@@ -33,10 +38,11 @@
     }
 
     h1 {
-      font-size: 2rem;
+      font-size: 2.2rem;
       color: #333;
       margin-bottom: 30px;
-      min-height: 80px;
+      min-height: 100px;
+      padding: 0 10px;
     }
 
     .buttons {
@@ -44,36 +50,32 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 20px;
-      min-height: 200px; /* Space for the growing button */
+      gap: 25px;
+      min-height: 250px;
     }
 
     button {
-      padding: 15px 30px;
-      font-size: 1.1rem;
+      padding: 15px 35px;
+      font-size: 1.2rem;
       font-weight: bold;
       border: none;
       border-radius: 50px;
       cursor: pointer;
-      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
 
     #yesBtn {
       background-color: var(--primary-pink);
       color: white;
-      z-index: 10;
+      z-index: 999;
     }
 
     #noBtn {
       background-color: #fff;
       color: #888;
       position: relative;
-    }
-
-    #successMsg {
-      flex-direction: column;
-      align-items: center;
+      z-index: 10;
     }
 
     .heart {
@@ -82,6 +84,7 @@
       font-size: 20px;
       pointer-events: none;
       animation: floatUp 2s linear forwards;
+      z-index: 1000;
     }
 
     @keyframes floatUp {
@@ -96,18 +99,26 @@
 
   <div class="container" id="mainScreen">
     <h1 id="question">Will you be my Valentine? ❤️</h1>
-    <div class="buttons" id="buttonArea">
+    <div class="buttons">
       <button id="yesBtn">Yes</button>
       <button id="noBtn">No</button>
     </div>
   </div>
 
   <div class="container hidden" id="successScreen">
-    <h1 style="color: var(--primary-pink); font-size: 3rem;">Yay!!! 💖</h1>
-    <p style="font-size: 1.5rem;">See you on the 14th Priya!</p>
+    <h1 style="color: var(--primary-pink); font-size: 3.5rem; margin-bottom: 10px;">Yay!!! 💖</h1>
+    <p style="font-size: 1.5rem; color: #555;">Happy Valentine's Day! <br> I've been notified of your choice. 😉</p>
   </div>
 
   <script>
+    // --- 1. CONFIGURATION ---
+    // Get these from your EmailJS Dashboard
+    const EMAILJS_PUBLIC_KEY = "jAg7wEsvUT7FQIEj4"; 
+    const EMAILJS_SERVICE_ID = "service_wni2a5f";
+    const EMAILJS_TEMPLATE_ID = "template_eoz8ozk";
+
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+
     const noBtn = document.getElementById("noBtn");
     const yesBtn = document.getElementById("yesBtn");
     const question = document.getElementById("question");
@@ -116,115 +127,75 @@
 
     const messages = [
       "Are you sure? 🤔",
-      "Really sure? 🥺",
-      "Think about it! 💭",
-      "Don't do this to me... 💔",
+      "Think again! 💭",
+      "No other option 😌",
+      "You're breaking my heart! 💔",
       "I'm gonna cry... 😭",
-      "You're breaking my heart! 🍎",
-      "Wrong button! 😄",
       "Try again 😏",
-      "No other option 😌"
+      "Wrong answer 😄",
+      "Just say yes! ❤️"
     ];
 
     let clickCount = 0;
 
-    // This function handles both moving the button AND updating the text/size
+    // --- 2. RUNAWAY & GROWTH LOGIC ---
     function handleNoAction() {
-      // 1. Move the button
-      const padding = 50;
+      // Move No Button
+      const padding = 100;
       const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - padding);
       const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - padding);
       
       noBtn.style.position = "fixed";
-      noBtn.style.left = `${x}px`;
-      noBtn.style.top = `${y}px`;
+      noBtn.style.left = `${Math.max(padding, x)}px`;
+      noBtn.style.top = `${Math.max(padding, y)}px`;
 
-      // 2. Update the text message
+      // Update Text
       question.textContent = messages[clickCount % messages.length];
       
-      // 3. Make the YES button bigger
+      // Grow Yes Button
       clickCount++;
-      const newScale = 1 + (clickCount * 0.3);
-      yesBtn.style.transform = `scale(${newScale})`;
+      const scale = 1 + (clickCount * 0.4); 
+      yesBtn.style.transform = `scale(${scale})`;
       
-      // 4. Fade the No button slightly
-      noBtn.style.opacity = Math.max(0.3, 1 - (clickCount * 0.1));
-    }
-
-    // Trigger on both hover (desktop) and click (mobile/desktop)
-    noBtn.addEventListener("mouseover", handleNoAction);
-    noBtn.addEventListener("click", handleNoAction);
-
-    yesBtn.addEventListener("click", () => {
-      mainScreen.classList.add("hidden");
-      successScreen.classList.remove("hidden");
-      createHearts();
-    });
-
-    function createHearts() {
-      for (let i = 0; i < 50; i++) {
-        setTimeout(() => {
-          const heart = document.createElement("div");
-          heart.classList.add("heart");
-          heart.innerHTML = "❤️";
-          heart.style.left = Math.random() * 100 + "vw";
-          heart.style.top = "100vh";
-          heart.style.fontSize = (Math.random() * 20 + 10) + "px";
-          heart.style.animationDuration = (Math.random() * 2 + 1) + "s";
-          document.body.appendChild(heart);
-          
-          setTimeout(() => heart.remove(), 2000);
-        }, i * 50);
-      }
-    }
-
-    function moveButton() {
-      // Calculate random position within the viewport
-      const padding = 50;
-      const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - padding);
-      const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - padding);
-      
-      noBtn.style.position = "fixed";
-      noBtn.style.left = `${x}px`;
-      noBtn.style.top = `${y}px`;
-    }
-
-    function updateUI() {
-      // Change the question text
-      question.textContent = messages[clickCount % messages.length];
-      
-      // Make the YES button bigger!
-      clickCount++;
-      const newScale = 1 + (clickCount * 0.3);
-      yesBtn.style.transform = `scale(${newScale})`;
-      
-      // Push the No button further away in hierarchy
+      // Gradually fade the No button
       noBtn.style.opacity = Math.max(0.2, 1 - (clickCount * 0.1));
     }
 
+    noBtn.addEventListener("mouseover", handleNoAction);
+    noBtn.addEventListener("click", handleNoAction);
+
+    // --- 3. SUCCESS LOGIC ---
     yesBtn.addEventListener("click", () => {
+      // Send Email Notification
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        message: "They clicked YES! ❤️",
+        date: new Date().toLocaleString()
+      });
+
+      // Switch Screens
       mainScreen.classList.add("hidden");
       successScreen.classList.remove("hidden");
+      
+      // Animation
       createHearts();
     });
 
     function createHearts() {
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < 60; i++) {
         setTimeout(() => {
           const heart = document.createElement("div");
           heart.classList.add("heart");
-          heart.innerHTML = "❤️";
+          heart.innerHTML = ["❤️", "💖", "💝", "💕"][Math.floor(Math.random() * 4)];
           heart.style.left = Math.random() * 100 + "vw";
           heart.style.top = "100vh";
-          heart.style.fontSize = (Math.random() * 20 + 10) + "px";
-          heart.style.animationDuration = (Math.random() * 2 + 1) + "s";
+          heart.style.fontSize = (Math.random() * 20 + 15) + "px";
+          heart.style.animationDuration = (Math.random() * 2 + 2) + "s";
           document.body.appendChild(heart);
           
-          setTimeout(() => heart.remove(), 2000);
-        }, i * 50);
+          setTimeout(() => heart.remove(), 3000);
+        }, i * 70);
       }
     }
   </script>
 </body>
 </html>
-
